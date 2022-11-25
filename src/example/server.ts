@@ -19,11 +19,23 @@ const totp = otipi<typeof sampleUser>({
   },
 })
 
-app.use('/generate', totp.createToken())
-
-app.use('/token/uri', totp.generateTokenURL())
-
-app.use('/token/qr', totp.generateTokenQR())
+app.use('/generate', (req, res) => res.status(200).send(totp.generateNewSecret()))
+app.use('/token/uri', async (req, res) =>
+  res
+    .status(200)
+    .setHeader('Content-Type', 'text/plain')
+    .send(await totp.generateSecretURL(sampleUser.username, sampleUser.secret)),
+)
+app.use('/token/qr', async (req, res) =>
+  res
+    .status(200)
+    .setHeader('Content-Type', 'text/html')
+    .send(
+      '<img src="' +
+        (await totp.generateSecretQR(sampleUser.username, sampleUser.secret)) +
+        '" style="width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated;" />',
+    ),
+)
 
 app.use(totp.authenticate())
 
