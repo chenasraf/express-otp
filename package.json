@@ -1,9 +1,9 @@
 {
-  "name": "otipi",
+  "name": "express-otp",
   "version": "0.1.0",
   "description": "Easy auth with your admin endpoints using OTP",
   "main": "index.js",
-  "repository": "https://github.com/chenasraf/otipi",
+  "repository": "https://github.com/chenasraf/express-otp",
   "author": "Chen Asraf <contact@casraf.dev>",
   "license": "MIT",
   "scripts": {

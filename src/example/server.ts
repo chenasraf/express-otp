@@ -1,5 +1,5 @@
 import express from 'express'
-import otipi from '..'
+import otp from '..'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -8,7 +8,7 @@ const app = express()
 
 const sampleUser = { id: 1, username: process.env.USER_NAME!, secret: process.env.USER_SECRET! }
 
-const totp = otipi<typeof sampleUser>({
+const totp = otp<typeof sampleUser>({
   issuer: 'my-issuer',
   getUser: (req) => {
     const user = [sampleUser].find((x) => x.username === req.query.username)

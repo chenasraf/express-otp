@@ -1,4 +1,4 @@
-# otipi
+# express-otp
 
 Incredibly simple TOTP authentication for your Node.JS/Express backend.
 
@@ -13,10 +13,10 @@ See [src/example/server.ts](src/example/server.ts) for a fully working example u
 
 ### Initialize
 
-First, use the `otipi` function to generate middleware and functions for your use:
+First, use the `express-otp` function to generate middleware and functions for your use:
 
 ```typescript
-const totp = otipi({
+const totp = otp({
   // Any identifier that is for your app
   issuer: 'my-issuer',
   // This should return user information if a request contains a valid user
