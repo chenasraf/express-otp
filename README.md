@@ -1,11 +1,18 @@
 # express-otp
 
+<h2 align="center">
+
+[GitHub](https://github.com/chenasraf/express-otp) | [Documentation](https://casraf.dev/express-otp)
+| [NPM](https://npmjs.com/package/express-otp) | [casraf.dev](https://casraf.dev)
+
+</h2>
+
 Incredibly simple TOTP authentication for your Node.JS/Express backend.
 
 Use it for authenticating either select admins to perform sensitive actions, or use it as the main
 auth mechanism for your app.
 
-Set-up is incredibly simple!
+Set-up is incredibly easy!
 
 ## Getting started
 
