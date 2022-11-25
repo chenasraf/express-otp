@@ -17,6 +17,7 @@ const totp = otipi<typeof sampleUser>({
     }
     return { user, secret: user.secret, username: user.username }
   },
+  getToken: (req) => req.headers['X-OTP-Token'] as string,
 })
 
 app.use('/generate', (req, res) => res.status(200).send(totp.generateNewSecret()))
@@ -48,7 +49,7 @@ app.use('/verify', (req, res) => {
     return
   }
 
-  res.send('Logged in as user ' + req.user.id)
+  res.send('Logged in as user ' + JSON.stringify(req.user))
   res.status(200)
 })
 

@@ -4,6 +4,16 @@ import QR from 'qrcode'
 import _totp from 'totp-generator'
 import { Request, Response } from 'express'
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    export interface Request {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      user?: any
+    }
+  }
+}
+
 export interface TotpOptions {
   /** The issuer for your app (required) */
   issuer: string
@@ -90,7 +100,7 @@ export interface TotpMiddlewares {
    *
    * @returns {string} The URL for the user.
    */
-  generateSecretURL(username: string, secret: string): Promise<string>
+  generateSecretURL(username: string, secret: string): string
 
   /**
    * Function for generating a QR code for a user from a given `secret` and `username`.
@@ -130,26 +140,7 @@ export interface TotpMiddlewares {
   /**
    * Generates a random, 32-byte secret key. You can attach this to your user object or DB however you want.
    */
-  generateNewSecret(): Promise<string>
-}
-
-function base32secret(length = 32) {
-  return encode(crypto.randomBytes(32)).slice(0, length)
-}
-
-type OTPUriParams = Record<'secret' | 'issuer' | 'username', string>
-
-function generateTokenUri({ secret, issuer, username }: OTPUriParams) {
-  const uri = new URL('otpauth://totp/')
-  uri.searchParams.set('secret', secret)
-  uri.searchParams.set('issuer', issuer)
-  uri.searchParams.set('algorithm', 'SHA1')
-  uri.searchParams.set('digits', '6')
-  uri.searchParams.set('period', '30')
-  uri.searchParams.set('account', username)
-  uri.username = issuer
-  uri.password = username
-  return uri.toString()
+  generateNewSecret(): string
 }
 
 function generateQR(uri: string, filename?: string): Promise<string> | Promise<void> {
@@ -192,18 +183,17 @@ export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): Totp
   async function authenticate(req: Request, res: Response, next: () => void): Promise<void> {
     const resp = await options.getUser(req)
     if (!resp) {
-      res.status(401)
-      res.send('Unauthorized')
-      res.end()
+      next()
       return
     }
+
     const { user, secret } = resp
     const token = await options.getToken(req)
 
     if (token) {
       if (_totp(secret, options) !== token) {
-        res.status(400)
-        res.send('Invalid token')
+        res.status(401)
+        res.send('Unauthorized')
         res.end()
         return
       }
@@ -214,12 +204,23 @@ export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): Totp
     next()
   }
 
-  async function generateSecretURL(username: string, secret: string): Promise<string> {
-    return generateTokenUri({
-      secret,
-      issuer: options.issuer,
-      username,
-    })
+  function generateSecretURL(username: string, secret: string): string {
+    const uri = new URL('otpauth://totp/')
+    uri.searchParams.set('secret', secret)
+    uri.searchParams.set('issuer', options.issuer)
+    if (defaultOptions.algorithm !== options.algorithm) {
+      uri.searchParams.set('algorithm', options.algorithm)
+    }
+    if (defaultOptions.digits !== options.digits) {
+      uri.searchParams.set('digits', options.digits.toString())
+    }
+    if (defaultOptions.period !== options.period) {
+      uri.searchParams.set('period', options.period.toString())
+    }
+    uri.searchParams.set('account', username)
+    uri.username = options.issuer
+    uri.password = username
+    return uri.toString()
   }
 
   async function generateSecretQR(
@@ -227,17 +228,12 @@ export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): Totp
     secret: string,
     filename?: string,
   ): Promise<never> {
-    const uri = generateTokenUri({
-      secret,
-      issuer: options.issuer,
-      username,
-    })
-
+    const uri = await generateSecretURL(username, secret)
     return generateQR(uri, filename) as Promise<never>
   }
 
-  async function generateNewSecret(): Promise<string> {
-    return base32secret()
+  function generateNewSecret(): string {
+    return encode(crypto.randomBytes(32)).slice(0, 32)
   }
 
   return {

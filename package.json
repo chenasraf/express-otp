@@ -7,8 +7,9 @@
   "author": "Chen Asraf <contact@casraf.dev>",
   "license": "MIT",
   "scripts": {
-    "watch": "concurrently \"tsc -w\" \"nodemon build/index.js\"",
-    "watch:server": "concurrently \"tsc -w\" \"nodemon build/example/server.js\""
+    "start": "concurrently \"tsc -w\" \"nodemon build/example/server.js\"",
+    "build": "tsc",
+    "docs:build": "typedoc --out docs src/index.ts"
   },
   "dependencies": {
     "hi-base32": "^0.5.1",
@@ -27,6 +28,7 @@
     "eslint": "^8.28.0",
     "express": "^4.18.2",
     "nodemon": "^2.0.20",
+    "typedoc": "^0.23.21",
     "typescript": "^4.9.3"
   }
 }

@@ -3,18 +3,10 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "watch",
+      "script": "start",
       "group": "build",
       "problemMatcher": [],
-      "label": "npm: watch",
-      "detail": "concurently \"tsc -w\" \"nodemon build/index.js\""
-    },
-    {
-      "type": "npm",
-      "script": "watch:server",
-      "group": "build",
-      "problemMatcher": [],
-      "label": "npm: watch:server",
+      "label": "npm: start",
       "detail": "concurently \"tsc -w\" \"nodemon build/index.js\""
     }
   ]
