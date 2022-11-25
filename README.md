@@ -20,9 +20,11 @@ See [src/example/server.ts](src/example/server.ts) for a fully working example u
 
 ### Initialize
 
-First, use the `express-otp` function to generate middleware and functions for your use:
+First, use the `otp` function to generate middleware and functions for your use:
 
 ```typescript
+import otp from 'express-otp'
+
 const totp = otp({
   // Any identifier that is for your app
   issuer: 'my-issuer',
@@ -70,8 +72,12 @@ await totp.generateSecretQR(username, secret, '/path/to/qr.png')
 
 ### Authenticate a user
 
-To authenticate any endpoint, use the provided `authenticate()` middleware, and the `req` object
-contains a `user`, that means your user is authenticated!
+To lock any endpoint behind authentication, use the provided `authenticate()` middleware. If the
+user provided the token by your specified method, the user is injected into the request. If the
+`req` object contains a `user`, that means your user is authenticated!
+
+Further requests will still need to be validated with a correct token. The authentication state will
+**not be saved in memory** between sessions - that is up to you to implement (if necessary).
 
 ```typescript
 app.get('/user/me', totp.authenticate(), (req, res) => {
