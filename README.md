@@ -103,7 +103,7 @@ If you are a developer and want to contribute code, here are some starting tips:
 
 1. Fork this repository
 2. Run `yarn install`
-3. Run `yarn watch:server` to start file watch mode
+3. Run `yarn start` to start file watch mode
 4. Make any changes you would like
 5. Create tests for your changes
 6. Update the relevant documentation (readme, code comments, type comments)
