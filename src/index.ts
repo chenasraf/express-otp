@@ -276,7 +276,6 @@ function _verifyToken<U>(
   secret: string,
   reqToken: string,
 ) {
-  options = { ...options, timestamp: options.timestamp ?? Date.now() }
   const genToken = _totp(secret, options)
   return genToken === reqToken
 }
