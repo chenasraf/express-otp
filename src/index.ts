@@ -2,7 +2,7 @@ import crypto from 'node:crypto'
 import { encode } from 'hi-base32'
 import QR from 'qrcode'
 import _totp from 'totp-generator'
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -81,7 +81,7 @@ export interface TotpApiOptions<U> {
   getToken?(req: Request): PromiseOrValue<string | undefined>
 }
 
-export interface TotpMiddlewares {
+export interface TotpMiddlewares<U> {
   /**
    * Middleware for authenticating a user, using their secret and the token provided in the request.
    *
@@ -128,8 +128,9 @@ export interface TotpMiddlewares {
   /**
    * Function for generating a QR code for a user from a given `secret` and `username`.
    *
-   * If `filename` is provided, this writes the QR code directly to that path, which you can later use to serve to the user.
-   * If `filename` is omitted (or blank), this returns a PNG image as a data URL.
+   * - If `filename` is provided, this writes the QR code directly to that path, which you can later use to serve to the
+   * user.
+   * - If `filename` is omitted (or blank), this returns a PNG image as a data URL.
    *
    * @param {string} username The username to use for generating the URL.
    * @param {string} secret The secret to use for generating the URL.
@@ -141,6 +142,25 @@ export interface TotpMiddlewares {
    * Generates a random, 32-byte secret key. You can attach this to your user object or DB however you want.
    */
   generateNewSecret(): string
+
+  /**
+   * Verifies a given token against a given secret. If the provided token is equal to the generated token for given
+   * secret, it returns `true`. Otherwise, it returns `false`.
+   *
+   * @param secret The secret key of the user.
+   * @param token The request token to verify against.
+   *
+   * @returns {boolean} `true` if the token is valid, `false` otherwise.
+   */
+  verifyToken(secret: string, token: string): boolean
+
+  /**
+   * Returns the user, only if the token is valid. Otherwise, it returns `undefined`.
+   *
+   * @param req The request object.
+   * @returns {Promise<U | undefined>} The user, or `undefined` if the token is invalid.
+   */
+  verifyUser(req: Request): Promise<U | undefined>
 }
 
 function generateQR(uri: string, filename?: string): Promise<string> | Promise<void> {
@@ -174,53 +194,26 @@ const defaultOptions: Omit<TotpOptions & TotpApiOptions<unknown>, 'issuer' | 'ge
   getToken: (req) => req.query.token as string,
 }
 
-export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): TotpMiddlewares {
+export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): TotpMiddlewares<U> {
   const options = {
     ...defaultOptions,
     ..._options,
   } as Required<TotpOptions & TotpApiOptions<U>>
 
-  async function authenticate(req: Request, res: Response, next: () => void): Promise<void> {
-    const resp = await options.getUser(req)
-    if (!resp) {
-      next()
-      return
-    }
+  async function authenticate(req: Request, res: Response, next: NextFunction): Promise<void> {
+    _authenticate<U>(req, res, next, options)
+  }
 
-    const { user, secret } = resp
-    const token = await options.getToken(req)
+  async function verifyUser(req: Request): Promise<U | undefined> {
+    return _verifyUser<U>(options, req)
+  }
 
-    if (token) {
-      if (_totp(secret, options) !== token) {
-        res.status(401)
-        res.send('Unauthorized')
-        res.end()
-        return
-      }
-
-      req.user = user
-    }
-
-    next()
+  function verifyToken(secret: string, token: string): boolean {
+    return _verifyToken<U>(options, secret, token)
   }
 
   function generateSecretURL(username: string, secret: string): string {
-    const uri = new URL('otpauth://totp/')
-    uri.searchParams.set('secret', secret)
-    uri.searchParams.set('issuer', options.issuer)
-    if (defaultOptions.algorithm !== options.algorithm) {
-      uri.searchParams.set('algorithm', options.algorithm)
-    }
-    if (defaultOptions.digits !== options.digits) {
-      uri.searchParams.set('digits', options.digits.toString())
-    }
-    if (defaultOptions.period !== options.period) {
-      uri.searchParams.set('period', options.period.toString())
-    }
-    uri.searchParams.set('account', username)
-    uri.username = options.issuer
-    uri.password = username
-    return uri.toString()
+    return _generateSecretURL<U>(options, secret, username)
   }
 
   async function generateSecretQR(
@@ -228,8 +221,7 @@ export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): Totp
     secret: string,
     filename?: string,
   ): Promise<never> {
-    const uri = await generateSecretURL(username, secret)
-    return generateQR(uri, filename) as Promise<never>
+    return await _generateSecretQR(options, username, secret, filename)
   }
 
   function generateNewSecret(): string {
@@ -241,5 +233,92 @@ export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): Totp
     generateSecretURL,
     generateSecretQR,
     generateNewSecret,
+    verifyToken,
+    verifyUser,
   }
+}
+
+function _generateSecretQR<U>(
+  options: Required<TotpOptions & TotpApiOptions<U>>,
+  username: string,
+  secret: string,
+  filename: string | undefined,
+) {
+  const uri = _generateSecretURL(options, username, secret)
+  return generateQR(uri, filename) as Promise<never>
+}
+
+function _generateSecretURL<U>(
+  options: Required<TotpOptions & TotpApiOptions<U>>,
+  secret: string,
+  username: string,
+) {
+  const uri = new URL('otpauth://totp/')
+  uri.searchParams.set('secret', secret)
+  uri.searchParams.set('issuer', options.issuer)
+  if (defaultOptions.algorithm !== options.algorithm) {
+    uri.searchParams.set('algorithm', options.algorithm)
+  }
+  if (defaultOptions.digits !== options.digits) {
+    uri.searchParams.set('digits', options.digits.toString())
+  }
+  if (defaultOptions.period !== options.period) {
+    uri.searchParams.set('period', options.period.toString())
+  }
+  uri.searchParams.set('account', username)
+  uri.username = options.issuer
+  uri.password = username
+  return uri.toString()
+}
+
+function _verifyToken<U>(
+  options: Required<TotpOptions & TotpApiOptions<U>>,
+  secret: string,
+  reqToken: string,
+) {
+  options = { ...options, timestamp: options.timestamp ?? Date.now() }
+  const genToken = _totp(secret, options)
+  return genToken === reqToken
+}
+
+async function _verifyUser<U>(
+  options: Required<TotpOptions & TotpApiOptions<U>>,
+  req: Request,
+): Promise<U | undefined> {
+  const resp = await options.getUser(req)
+  if (!resp) {
+    return
+  }
+
+  const { user, secret } = resp
+  const token = await options.getToken(req)
+
+  if (token) {
+    if (!_verifyToken(options, secret, token)) {
+      return
+    }
+
+    return user
+  }
+}
+
+async function _authenticate<U>(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  options: Required<TotpOptions & TotpApiOptions<U>>,
+) {
+  const token = await options.getToken(req)
+  const user = await _verifyUser(options, req)
+
+  if (token) {
+    if (!user) {
+      next(Error('Unauthorized'))
+      return
+    }
+
+    req.user = user
+  }
+
+  next(null)
 }

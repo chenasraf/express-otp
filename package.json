@@ -1,6 +1,6 @@
 {
   "name": "express-otp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Easy OTP auth for your express app",
   "main": "index.js",
   "repository": "https://github.com/chenasraf/express-otp",

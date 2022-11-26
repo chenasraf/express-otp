@@ -90,6 +90,26 @@ app.get('/user/me', totp.authenticate(), (req, res) => {
 })
 ```
 
+#### Manual authentication
+
+If you want to manually check the OTP in your own middleware, you can use the `verifyUser` and
+`verifyToken` methods. You will need to inject the user yourself in that case. However, you would
+get more fine-tuned control over the response timing & structure.
+
+```typescript
+if ('token' in req.query) {
+  console.log('Token is valid:', totp.verifyToken(userSecret, req.token))
+  const user = await totp.verifyUser(req)
+  if (!user) {
+    next(new Error('Invalid OTP token'))
+    return
+  }
+  req.user = user
+  next(null)
+  return
+}
+```
+
 ## Contributing
 
 I am developing this package on my free time, so any support, whether code, issues, or just stars is
