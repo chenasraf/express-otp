@@ -7,6 +7,14 @@
   "homepage": "https://casraf.dev/express-otp",
   "author": "Chen Asraf <contact@casraf.dev>",
   "license": "MIT",
+  "keywords": [
+    "auth",
+    "express",
+    "middleware",
+    "nodejs",
+    "otp",
+    "typescript"
+  ],
   "scripts": {
     "start": "concurrently \"tsc -w\" \"nodemon build/example/server.js\"",
     "build": "tsc -p tsconfig.build.json && ts-node scripts/build.ts",
