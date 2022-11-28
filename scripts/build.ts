@@ -17,9 +17,9 @@ async function main() {
   console.log('Done')
 }
 
-async function copyFile(file: string) {
-  const readme = await fs.readFile(file, 'utf-8')
-  await fs.writeFile(path.join('build', file), readme)
+async function copyFile(filename: string) {
+  const data = await fs.readFile(filename, 'utf-8')
+  await fs.writeFile(path.join('build', filename), data)
 }
 
 main()

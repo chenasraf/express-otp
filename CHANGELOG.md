@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.0
+
+- feat: add `errorResponse` option
+
 ## v0.1.1
 
 - feat: add `verifyToken` and `verifyUser` functions

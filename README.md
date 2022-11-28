@@ -28,6 +28,7 @@ import otp from 'express-otp'
 const totp = otp({
   // Any identifier that is for your app
   issuer: 'my-issuer',
+
   // This should return user information if a request contains a valid user
   // attempt (such as username or email)
   getUser: async (req) => {
@@ -37,9 +38,19 @@ const totp = otp({
     }
     return { user: user.details, secret: user.secret, username: user.username }
   },
+
   // By default, the token is fetched using `req.query.token`. You can change
   // that by providing a `getToken` option:
   getToken: (req) => req.headers['X-OTP-Token'] as string,
+
+  // Use this option to immediately respond with an error when a token is
+  // missing/invalid. If this is omitted, the next route/middleware will fire
+  // normally, but without `req.user` injected. Providing this function ends
+  // the response if it's fired.
+  errorResponse(req, res, next, error) {
+    res.send(error.message)
+    res.status(401)
+  },
 })
 ```
 
@@ -73,8 +84,9 @@ await totp.generateSecretQR(username, secret, '/path/to/qr.png')
 ### Authenticate a user
 
 To lock any endpoint behind authentication, use the provided `authenticate()` middleware. If the
-user provided the token by your specified method, the user is injected into the request. If the
-`req` object contains a `user`, that means your user is authenticated!
+user provided the token by your specified method, the user is injected into the request. Otherwise,
+an error will be chained to the next middleware. You can make it respond immediately with an error
+by using `errorResponse` option.
 
 Further requests will still need to be validated with a correct token. The authentication state will
 **not be saved in memory** between sessions - that is up to you to implement (if necessary).
