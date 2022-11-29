@@ -50,5 +50,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./package.tgz
-          asset_name: formplex-react ${{ steps.update_tag.outputs.tagname }}.tgz
+          asset_name: express-otp ${{ steps.update_tag.outputs.tagname }}.tgz
           asset_content_type: application/tgz

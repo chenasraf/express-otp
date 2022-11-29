@@ -33,7 +33,7 @@ If applicable, paste your logs to help explain your problem.
 - Node.js: [e.g. 16.8]
 - Browser: [e.g. Chrome, Firefox, Edge]
 - Browser Version: [e.g. 59.0.0.0]
-- FormPlex-React Version [e.g. 1.0.0]
+- express-otp Version [e.g. 1.0.0]
 
 #### Additional context
 

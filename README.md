@@ -51,6 +51,15 @@ const totp = otp({
     res.send(error.message)
     res.status(401)
   },
+
+  // Use `true` for default OTP form, or respond with your own form in a function.
+  // The default form will redirect to the same URL with the `token` URL
+  // parameter added. To modify this behavior to use another token method,
+  // you will have to supply your own form.
+  tokenForm: true,
+  tokenForm(req, res) {
+    res.render(myFormPage)
+  },
 })
 ```
 
@@ -84,9 +93,16 @@ await totp.generateSecretQR(username, secret, '/path/to/qr.png')
 ### Authenticate a user
 
 To lock any endpoint behind authentication, use the provided `authenticate()` middleware. If the
-user provided the token by your specified method, the user is injected into the request. Otherwise,
-an error will be chained to the next middleware. You can make it respond immediately with an error
-by using `errorResponse` option.
+user provided the token by your specified method, the user is injected into the request.
+
+If you specified `tokenForm` as true or your own function, a missing token will trigger that form to
+be responded to the user.
+
+Otherwise, an error will be chained to the next middleware. You can make it respond immediately with
+an error by using `errorResponse` option.
+
+You can pass options to the `authenticate()` method to override options from the top-level call, for
+example setting a custom error response, or token form page.
 
 Further requests will still need to be validated with a correct token. The authentication state will
 **not be saved in memory** between sessions - that is up to you to implement (if necessary).
@@ -120,6 +136,29 @@ if ('token' in req.query) {
   next(null)
   return
 }
+```
+
+### Customizing error/token form
+
+You can supply functions that will act as middleware when getting a request with no token, or an
+invalid token or a missing user.
+
+When either of theses are specified, they are used instead of the default behaviors.
+
+```typescript
+const totp = otp({
+  // custom token form
+  tokenForm(req, res) {
+    res.status(200).render(myTokenForm)
+  },
+  // custom error page
+  errorResponse(req, res, next, error) {
+    res.status(400).json({
+      code: error.type,
+      message: error.message,
+    })
+  },
+})
 ```
 
 ## Contributing
