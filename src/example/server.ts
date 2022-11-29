@@ -47,11 +47,17 @@ app.use('/token/qr', async (req, res) =>
     ),
 )
 
-app.use('/verify', totp.authenticate(), (req, res) => {
-  res.setHeader('Content-Type', 'text/plain')
-  res.send('Logged in as user ' + JSON.stringify(req.user))
-  res.status(200)
-})
+app.use(
+  '/verify',
+  totp.authenticate({
+    tokenForm: true,
+  }),
+  (req, res) => {
+    res.setHeader('Content-Type', 'text/plain')
+    res.send('Logged in as user ' + JSON.stringify(req.user))
+    res.status(200)
+  },
+)
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000')

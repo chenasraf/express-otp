@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.0
+
+- feat: add token end-user form
+
 ## v0.2.0
 
 - feat: add `errorResponse` option

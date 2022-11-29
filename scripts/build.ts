@@ -8,6 +8,16 @@ async function main() {
   delete json.scripts
   await fs.writeFile(path.join('build', 'package.json'), JSON.stringify(json, null, 2))
 
+  //
+  const viewDir = path.join('build', 'views')
+  const viewPath = path.join('src', 'views', 'get_token.html')
+  const viewOutPath = path.join('build', 'views', 'get_token.html')
+  await fs.mkdir(viewDir, { recursive: true })
+  console.log(`Copying ${viewPath}`)
+
+  const data = await fs.readFile(viewPath, 'utf-8')
+  await fs.writeFile(viewOutPath, data)
+
   console.log('Copying README.md')
   await copyFile('README.md')
 

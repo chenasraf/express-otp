@@ -86,18 +86,57 @@ export interface TotpApiOptions<U> {
    * @param next The next function.
    */
   errorResponse?(req: Request, res: Response, next: NextFunction, reason: OTPError): void
+
+  /**
+   * Setting this to `true` will cause the middleware to respond with a form to accept user input for the token if it
+   * is missing from the authorized request.
+   *
+   * Setting this to a function will use the function as the middleware to handle the request. You will be in chanrge of
+   * redirecting or otherwise handling the request in this case.
+   *
+   * This only works for GET requests, as it will redirect to the same URL with the token as a query parameter.
+   */
+  tokenForm?: ((req: Request, res: Response) => PromiseOrValue<void>) | boolean
+
+  /**
+   * Options for generating the token form.
+   */
+  tokenFormOptions?: Partial<TokenFormOptions>
 }
+
+/**
+ * Options for generating the token form.
+ */
+export interface TokenFormOptions {
+  /** A mapping of text labels to use in the form.*/
+  texts: Partial<Record<'title' | 'promptTitle' | 'promptDescription' | 'submitButton', string>>
+  /** Custom CSS to add to the page. Is appended at the end of <head>. */
+  css: string
+  /** Custom JS to add to the page. Is appended at the end of <body>. */
+  js: string
+  /** Custom HTML to prepend before the title, inside the <main> element. */
+  prependHtml: string
+  /** Custom HTML to append after the form, inside the <main> element. */
+  appendHtml: string
+}
+
+/**
+ * Options for the middleware. These override the options passed to `totp()`.
+ */
+export type AuthOptions<U> = Partial<TotpApiOptions<U>>
 
 export interface TotpMiddlewares<U> {
   /**
    * Middleware for authenticating a user, using their secret and the token provided in the request.
    *
-   * Use `getUser` in the options to control which user gets used for comparing the token to and later injected into
+   * @see {@link getUser | TotpOptions.getUser} in the options to control which user gets used for comparing the token to and later injected into
    * further requests.
    *
-   * Use `getToken` in the options to control how the token is fetched in the request (query, headers, etc).
+   * @see {@link getToken | TotpOptions.getToken} in the options to control how the token is fetched in the request (query, headers, etc).
    */
-  authenticate(): (req: Request, res: Response, next: () => void) => Promise<void>
+  authenticate(
+    options?: AuthOptions<U>,
+  ): (req: Request, res: Response, next: () => void) => Promise<void>
 
   /**
    * Function for generating a secret URL for a user from a given `secret` and `username`.

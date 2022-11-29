@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{title}}</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      *:not(pre, code) {
+        font-family: Helvetica, Arial, Tahoma, sans-serif;
+      }
+
+      html,
+      body {
+        font-size: 16px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      h2 {
+        font-size: 1.5em;
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .input {
+        width: 36px;
+        height: 48px;
+        text-align: center;
+        font-size: 22px;
+      }
+
+      .fields {
+        border: 0;
+      }
+    </style>
+    <style>
+      /*{{css}}*/
+    </style>
+  </head>
+  <body>
+    <main>
+      <!-- {{prependHtml}} -->
+      <h1 class="title">{{promptTitle}}</h1>
+
+      <h2 class="description">{{promptDescription}}</h2>
+
+      <form onsubmit="send()" class="form">
+        <fieldset class="fields">
+          <div class="inputs">
+            <input
+              class="input"
+              type="text"
+              name="securityKeyOtpResponse"
+              onkeyup="handleInput(event)"
+            />
+            <input class="input" type="text" onkeyup="handleInput(event)" />
+            <input class="input" type="text" onkeyup="handleInput(event)" />
+            <input class="input" type="text" onkeyup="handleInput(event)" />
+            <input class="input" type="text" onkeyup="handleInput(event)" />
+            <input class="input" type="text" onkeyup="handleInput(event)" />
+          </div>
+        </fieldset>
+      </form>
+
+      <!-- {{appendHtml}} -->
+    </main>
+
+    <script>
+      function handleInput(e) {
+        let { value = '' } = e.target
+        value = value.trim()
+
+        if (value.length === 1) {
+          e.target.nextElementSibling?.focus()
+        } else if (value.length === 0) {
+          e.target.previousElementSibling?.focus()
+        } else {
+          if (value.length >= 6) {
+            const inputs = document.querySelectorAll('input')
+            inputs.forEach((input, i) => {
+              input.value = value[i]
+            })
+          }
+        }
+
+        e.target.value = value.slice(0, 1)
+
+        if (getToken().length === 6) {
+          send()
+        }
+      }
+
+      function send() {
+        const token = getToken()
+        if (token.length < 6) {
+          return
+        }
+        const uri = new URL(window.location.href)
+        uri.searchParams.set('token', token)
+        document.querySelector('fieldset').disabled = true
+        window.location = uri
+      }
+
+      function getToken() {
+        const inputs = Array.from(document.querySelectorAll('input'))
+        const token = inputs.map((input) => input.value).join('')
+        return token
+      }
+
+      function reset() {
+        document.querySelectorAll('input').forEach((element) => {
+          element.value = ''
+        })
+        document.querySelector('fieldset').disabled = false
+      }
+
+      document.addEventListener('DOMContentLoaded', reset)
+      window.addEventListener('pageshow', reset)
+    </script>
+
+    <script>
+      /*{{js}}*/
+    </script>
+  </body>
+</html>
