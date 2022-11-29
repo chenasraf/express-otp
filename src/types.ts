@@ -91,7 +91,7 @@ export interface TotpApiOptions<U> {
    * Setting this to `true` will cause the middleware to respond with a form to accept user input for the token if it
    * is missing from the authorized request.
    *
-   * Setting this to a function will use the function as the middleware to handle the request. You will be in chanrge of
+   * Setting this to a function will use the function as the middleware to handle the request. You will be in charge of
    * redirecting or otherwise handling the request in this case.
    *
    * This only works for GET requests, as it will redirect to the same URL with the token as a query parameter.

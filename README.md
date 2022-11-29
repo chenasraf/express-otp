@@ -7,6 +7,9 @@
 
 </h2>
 
+![npm-version](https://img.shields.io/npm/v/express-otp)
+![gh-build](https://img.shields.io/github/workflow/status/chenasraf/express-otp/Release/master)
+
 Incredibly simple TOTP authentication for your Node.JS/Express backend.
 
 Use it for authenticating either select admins to perform sensitive actions, or use it as the main
