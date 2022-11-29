@@ -13,7 +13,7 @@ jobs:
         with:
           node-version: '14.x'
       - run: yarn install --frozen-lockfile
-      # - run: yarn test
+      - run: yarn test
       - run: yarn build
       - run: cd ./build && yarn pack --filename=../package.tgz
         if: "!contains(github.event.head_commit.message, '[skip publish]')"
