@@ -3,7 +3,7 @@
  *
  * - `no_user` - No user was found for the request.
  * - `no_token` - No token was found in the request.
- * - `invalid_token` - The token was invalid.
+ * - `invalid_token` - The token was malformed or did not match the expected token.
  */
 export type OTPErrorReason = 'invalid_token' | 'no_token' | 'no_user'
 

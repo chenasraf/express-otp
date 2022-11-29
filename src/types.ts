@@ -11,6 +11,7 @@ declare global {
   }
 }
 
+/** Options for TOTP generation */
 export interface TotpOptions {
   /** The issuer for your app (required) */
   issuer: string
@@ -19,6 +20,8 @@ export interface TotpOptions {
   /**
    * The desired SHA variant (SHA-1, SHA-224, SHA-256, SHA-384, SHA-512,
    * SHA3-224, SHA3-256, SHA3-384, SHA3-512, SHAKE128, or SHAKE256).
+   *
+   * Default is `SHA-1`.
    */
   algorithm?:
     | 'SHA-1'
@@ -47,8 +50,12 @@ export interface UserData<U> {
   username: string
 }
 
-type PromiseOrValue<T> = T | Promise<T>
+/**
+ * A promise of `T` or a value of `T`.
+ */
+export type PromiseOrValue<T> = T | Promise<T>
 
+/** Options for API middleware flow */
 export interface TotpApiOptions<U> {
   /**
    * If the return value is not `undefined`, it uses this function to verify and then inject the correct user into further
@@ -104,6 +111,9 @@ export interface TotpApiOptions<U> {
   tokenFormOptions?: Partial<TokenFormOptions>
 }
 
+/** Combination of {@link TotpOptions} and {@link TotpApiOptions}. */
+export type AllOptions<U> = TotpOptions & TotpApiOptions<U>
+
 /**
  * Options for generating the token form.
  */
@@ -129,10 +139,12 @@ export interface TotpMiddlewares<U> {
   /**
    * Middleware for authenticating a user, using their secret and the token provided in the request.
    *
-   * @see {@link getUser | TotpOptions.getUser} in the options to control which user gets used for comparing the token to and later injected into
+   * @param {AuthOptions<U>} options Options for the middleware.
+   *
+   * @see {@link TotpApiOptions.getUser | TotpApiOptions.getUser} to control which user gets used for comparing the token to and later injected into
    * further requests.
    *
-   * @see {@link getToken | TotpOptions.getToken} in the options to control how the token is fetched in the request (query, headers, etc).
+   * @see {@link TotpApiOptions.getToken | TotpApiOptions.getToken} to control how the token is fetched in the request (query, headers, etc).
    */
   authenticate(
     options?: AuthOptions<U>,
@@ -207,4 +219,15 @@ export interface TotpMiddlewares<U> {
    * @returns {Promise<U | undefined>} The user, or `undefined` if the token is invalid.
    */
   verifyUser(req: Request): Promise<U | undefined>
+}
+
+export const defaultOptions: Omit<Required<AllOptions<unknown>>, 'issuer' | 'getUser'> = {
+  digits: 6,
+  period: 30,
+  algorithm: 'SHA-1',
+  getToken: (req) => req.query.token as string,
+  tokenFormOptions: {},
+  errorResponse: undefined as never,
+  tokenForm: false,
+  timestamp: undefined as never,
 }

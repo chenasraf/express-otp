@@ -1,20 +1,15 @@
-import crypto from 'node:crypto'
 import fs from 'fs/promises'
 import path from 'path'
-import { encode } from 'hi-base32'
-import QR from 'qrcode'
-import _totp from 'totp-generator'
 import { NextFunction, Request, Response } from 'express'
-import { AuthOptions, TotpApiOptions, TotpMiddlewares, TotpOptions, UserData } from './types'
+import { AuthOptions, defaultOptions, TotpApiOptions, TotpMiddlewares, TotpOptions } from './types'
 import { OTPError } from './error'
-
-const defaultOptions: Omit<TotpOptions & TotpApiOptions<unknown>, 'issuer' | 'getUser'> = {
-  digits: 6,
-  period: 30,
-  algorithm: 'SHA-1',
-  getToken: (req) => req.query.token as string,
-  tokenFormOptions: {},
-}
+import {
+  _generateSecret,
+  _generateSecretQR,
+  _generateSecretURL,
+  _verifyToken,
+  _verifyUser,
+} from './token'
 
 export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): TotpMiddlewares<U> {
   const options = {
@@ -50,7 +45,7 @@ export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): Totp
   }
 
   function generateNewSecret(): string {
-    return encode(crypto.randomBytes(32)).slice(0, 32)
+    return _generateSecret()
   }
 
   return {
@@ -60,98 +55,6 @@ export default function totp<U>(_options: TotpOptions & TotpApiOptions<U>): Totp
     generateNewSecret,
     verifyToken,
     verifyUser,
-  }
-}
-
-function _generateQR(uri: string, filename?: string): Promise<string> | Promise<void> {
-  if (!filename) {
-    return new Promise<string>((resolve, reject) => {
-      QR.toDataURL(uri, (err, uri) => {
-        if (err) {
-          reject(err)
-          return
-        }
-        resolve(uri)
-      })
-    })
-  }
-
-  return new Promise<void>((resolve, reject) => {
-    QR.toFile(filename, uri, (err) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      resolve()
-    })
-  })
-}
-
-function _generateSecretQR<U>(
-  options: Required<TotpOptions & TotpApiOptions<U>>,
-  username: string,
-  secret: string,
-  filename: string | undefined,
-) {
-  const uri = _generateSecretURL(options, username, secret)
-  return _generateQR(uri, filename) as Promise<never>
-}
-
-function _generateSecretURL<U>(
-  options: Required<TotpOptions & TotpApiOptions<U>>,
-  username: string,
-  secret: string,
-) {
-  const uri = new URL('otpauth://totp/')
-  uri.username = options.issuer
-  uri.password = username
-
-  uri.searchParams.set('issuer', options.issuer)
-  uri.searchParams.set('account', username)
-  uri.searchParams.set('secret', secret)
-
-  if (defaultOptions.algorithm !== options.algorithm) {
-    uri.searchParams.set('algorithm', options.algorithm)
-  }
-
-  if (defaultOptions.digits !== options.digits) {
-    uri.searchParams.set('digits', options.digits.toString())
-  }
-
-  if (defaultOptions.period !== options.period) {
-    uri.searchParams.set('period', options.period.toString())
-  }
-
-  return uri.toString()
-}
-
-function _verifyToken<U>(
-  options: Required<TotpOptions & TotpApiOptions<U>>,
-  secret: string,
-  reqToken: string,
-) {
-  const genToken = _totp(secret, options)
-  return genToken === reqToken
-}
-
-async function _verifyUser<U>(
-  options: Required<TotpOptions & TotpApiOptions<U>>,
-  req: Request,
-  userData: UserData<U> | undefined,
-): Promise<U | undefined> {
-  if (!userData) {
-    return
-  }
-
-  const { user, secret } = userData
-  const token = await options.getToken(req)
-
-  if (token) {
-    if (!_verifyToken(options, secret, token)) {
-      return
-    }
-
-    return user
   }
 }
 
