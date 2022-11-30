@@ -7,7 +7,7 @@ import { encode } from 'hi-base32'
 
 /**
  * Generate a QR data URL OR file from given URL
- * @param {string} uri url to generae QR from
+ * @param {string} uri url to generate QR from
  * @param {string} filename filename to save to, if not present, returns data URL instead
  * @returns {string | void} data URL if not saved to file. If saved to file, returns nothing
  */

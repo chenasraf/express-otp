@@ -58,8 +58,8 @@ export type PromiseOrValue<T> = T | Promise<T>
 /** Options for API middleware flow */
 export interface TotpApiOptions<U> {
   /**
-   * If the return value is not `undefined`, it uses this function to verify and then inject the correct user into further
-   * requests in a middleware (usually before request processing).
+   * If the return value is not `undefined`, it uses this function to verify and then inject the correct user into
+   * further requests in a middleware (usually before request processing).
    *
    * This is where you would decide which users this request belongs to, via whatever method you want - going into DB,
    * checking headers, etc.
@@ -145,10 +145,11 @@ export interface TotpMiddlewares<U> {
    *
    * @param {AuthOptions<U>} options Options for the middleware.
    *
-   * @see {@link TotpApiOptions.getUser | TotpApiOptions.getUser} to control which user gets used for comparing the token to and later injected into
-   * further requests.
+   * @see {@link TotpApiOptions.getUser | TotpApiOptions.getUser} to control which user gets used for comparing the
+   * token to and later injected into further requests.
    *
-   * @see {@link TotpApiOptions.getToken | TotpApiOptions.getToken} to control how the token is fetched in the request (query, headers, etc).
+   * @see {@link TotpApiOptions.getToken | TotpApiOptions.getToken} to control how the token is fetched in the request
+   * (query, headers, etc).
    */
   authenticate(options?: AuthOptions<U>): (req: Request, res: Response, next: () => void) => Promise<void>
 
@@ -188,8 +189,8 @@ export interface TotpMiddlewares<U> {
   /**
    * Function for generating a QR code for a user from a given `secret` and `username`.
    *
-   * - If `filename` is provided, this writes the QR code directly to that path, which you can later use to serve to the
-   * user.
+   * - If `filename` is provided, this writes the QR code directly to that path, which you can later use to serve to
+   * the user.
    * - If `filename` is omitted (or blank), this returns a PNG image as a data URL.
    *
    * @param {string} username The username to use for generating the URL.
