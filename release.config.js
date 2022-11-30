@@ -1,6 +1,6 @@
 /** @type {import('semantic-release').Options} */
 module.exports = {
-  branches: ['master', 'develop', 'feat/*', 'fix/*'],
+  branches: ['master', { name: 'develop', prerelease: true }, { name: 'alpha', prerelease: true }, 'feat/*', 'fix/*'],
   analyzeCommits: {
     path: 'semantic-release-conventional-commits',
     majorTypes: ['major', 'breaking'],
@@ -61,7 +61,7 @@ module.exports = {
     [
       '@semantic-release/github',
       {
-        assets: ['build/**/*'],
+        assets: ['package.tgz'],
       },
     ],
   ],
