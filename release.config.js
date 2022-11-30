@@ -25,6 +25,9 @@ module.exports = {
       '@semantic-release/commit-analyzer',
       {
         preset: 'conventionalcommits',
+        parserOpts: {
+          noteKeywords: ['breaking'],
+        },
         releaseRules: [
           { type: 'docs', hidden: true },
           { type: 'feat', section: 'Features' },
@@ -62,6 +65,12 @@ module.exports = {
       '@semantic-release/github',
       {
         assets: ['package.tgz'],
+      },
+    ],
+    [
+      '@semantic-release/git',
+      {
+        assets: ['CHANGELOG.md'],
       },
     ],
   ],
