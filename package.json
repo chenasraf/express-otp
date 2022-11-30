@@ -28,6 +28,7 @@
     "totp-generator": "^0.0.14"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.2",
     "@types/express": "^4.17.14",
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
