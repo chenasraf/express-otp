@@ -135,6 +135,10 @@ export interface TokenFormOptions {
  */
 export type AuthOptions<U> = Partial<TotpApiOptions<U>>
 
+/**
+ * This object contains the `authenticate()` function which is the main middleware, as well as additional functions for
+ * generating tokens and URLs.
+ */
 export interface TotpMiddlewares<U> {
   /**
    * Middleware for authenticating a user, using their secret and the token provided in the request.
@@ -146,9 +150,7 @@ export interface TotpMiddlewares<U> {
    *
    * @see {@link TotpApiOptions.getToken | TotpApiOptions.getToken} to control how the token is fetched in the request (query, headers, etc).
    */
-  authenticate(
-    options?: AuthOptions<U>,
-  ): (req: Request, res: Response, next: () => void) => Promise<void>
+  authenticate(options?: AuthOptions<U>): (req: Request, res: Response, next: () => void) => Promise<void>
 
   /**
    * Function for generating a secret URL for a user from a given `secret` and `username`.
@@ -221,6 +223,9 @@ export interface TotpMiddlewares<U> {
   verifyUser(req: Request): Promise<U | undefined>
 }
 
+/**
+ * The default options for the middleware.
+ */
 export const defaultOptions: Omit<Required<AllOptions<unknown>>, 'issuer' | 'getUser'> = {
   digits: 6,
   period: 30,
