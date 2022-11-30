@@ -1,6 +1,6 @@
 {
   "name": "express-otp",
-  "version": "0.3.1",
+  "version": "0.0.0-development",
   "description": "OTP auth for your nodejs/express app, as easy as it gets!",
   "main": "index.js",
   "repository": "https://github.com/chenasraf/express-otp",
@@ -19,7 +19,8 @@
     "start": "concurrently \"tsc -w\" \"nodemon build/example/server.js\"",
     "build": "tsc -p tsconfig.build.json && ts-node scripts/build.ts",
     "docs": "typedoc --out docs src/index.ts",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "semantic-release": "semantic-release"
   },
   "dependencies": {
     "hi-base32": "^0.5.1",
@@ -31,6 +32,7 @@
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
     "@types/qrcode": "^1.5.0",
+    "@types/semantic-release": "^17.2.4",
     "@types/totp-generator": "^0.0.4",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
     "@typescript-eslint/parser": "^5.44.0",
@@ -40,6 +42,7 @@
     "express": "^4.18.2",
     "jest": "^29.3.1",
     "nodemon": "^2.0.20",
+    "semantic-release": "^19.0.5",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "typedoc": "^0.23.21",

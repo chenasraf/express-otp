@@ -1,0 +1,27 @@
+name: Semantic Release
+
+on:
+  push:
+    branches: [master, develop, feat/*, fix/*]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - run: yarn install --frozen-lockfile
+      - run: yarn test
+      - run: yarn semantic-release-pre
+        env:
+          NPM_TOKEN: '${{ secrets.NPM_TOKEN }}'
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      - run: yarn build
+      - run: cd ./build && yarn pack --filename=../package.tgz
+        if: "!contains(github.event.head_commit.message, '[skip publish]')"
+      - run: yarn semantic-release-post
+        env:
+          NPM_TOKEN: '${{ secrets.NPM_TOKEN }}'
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
