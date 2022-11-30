@@ -5,20 +5,7 @@ module.exports = {
     path: 'semantic-release-conventional-commits',
     majorTypes: ['major', 'breaking'],
     minorTypes: ['minor', 'feat', 'feature'],
-    patchTypes: [
-      'patch',
-      'fix',
-      'bugfix',
-      'chore',
-      'docs',
-      'style',
-      'refactor',
-      'perf',
-      'test',
-      'build',
-      'ci',
-      'revert',
-    ],
+    patchTypes: ['patch', 'fix', 'bugfix', 'refactor', 'perf', 'revert'],
   },
   plugins: [
     [
@@ -26,7 +13,7 @@ module.exports = {
       {
         preset: 'conventionalcommits',
         parserOpts: {
-          noteKeywords: ['breaking'],
+          noteKeywords: ['breaking:', 'breaking-fix:', 'breaking-feat:'],
         },
         releaseRules: [
           { type: 'docs', hidden: true },
@@ -34,8 +21,8 @@ module.exports = {
           { type: 'fix', section: 'Bug Fixes' },
           { type: 'chore', hidden: true },
           { type: 'style', hidden: true },
-          { type: 'refactor', hidden: true },
-          { type: 'perf', hidden: true },
+          { type: 'refactor', section: 'Misc' },
+          { type: 'perf', section: 'Misc' },
           { type: 'test', hidden: true },
         ],
       },
@@ -53,6 +40,7 @@ module.exports = {
       '@semantic-release/changelog',
       {
         changelogFile: 'CHANGELOG.md',
+        changelogTitle: '# Changelog',
       },
     ],
     [
@@ -70,7 +58,7 @@ module.exports = {
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md'],
+        assets: ['CHANGELOG.md', 'package.json'],
       },
     ],
   ],
