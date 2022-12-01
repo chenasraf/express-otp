@@ -48,7 +48,13 @@ module.exports = {
         },
       },
     ],
-    '@semantic-release/changelog',
+    [
+      '@semantic-release/changelog',
+      {
+        changelogFile: 'CHANGELOG.md',
+        changelogTitle: '# Change Log',
+      },
+    ],
     // [
     //   '@semantic-release/npm',
     //   {
