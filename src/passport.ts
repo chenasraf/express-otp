@@ -55,5 +55,6 @@ export class PassportOTPStrategy<T> extends Strategy {
 }
 
 export interface PassportOTPStrategyOptions {
+  successRedirect: string
   tokenFormURL: string
 }

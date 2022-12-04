@@ -51,8 +51,15 @@ export default function totp<U>(options: TotpOptions & TotpApiOptions<U>): TotpM
   }
 
   // passport strategy
-  function passport(optionsOverrides: Partial<AllOptions<U>>): PassportOTPStrategy<U> {
+  function passport(optionsOverrides?: Partial<AllOptions<U>>): PassportOTPStrategy<U> {
     return new PassportOTPStrategy({ ...mergedOptions, ...optionsOverrides })
+  }
+
+  function passportTokenForm() {
+    return async (req: Request, res: Response): Promise<void> => {
+      const tokenFormFile = await _renderTokenTemplate<U>(mergedOptions, 'passport')
+      res.setHeader('X-Requires-OTP', 'true').status(200).send(tokenFormFile)
+    }
   }
 
   // output
@@ -64,6 +71,7 @@ export default function totp<U>(options: TotpOptions & TotpApiOptions<U>): TotpM
     verifyToken,
     verifyUser,
     passport,
+    passportTokenForm,
   }
 }
 
@@ -119,7 +127,7 @@ export async function _authenticate<U>(
  * @param res The response object
  */
 async function _sendTokenFormTemplate<U>(
-  options: Required<Pick<TotpApiOptions<U>, 'tokenFormOptions' | 'tokenForm'>>,
+  options: Required<Pick<TotpApiOptions<U>, 'tokenFormOptions' | 'tokenForm' | 'passportOptions'>>,
   req: Request,
   res: Response,
 ): Promise<void> {
@@ -129,7 +137,7 @@ async function _sendTokenFormTemplate<U>(
 
   // default token form
   if (options.tokenForm === true) {
-    const tokenFormFile = await _renderTokenTemplate<U>(options)
+    const tokenFormFile = await _renderTokenTemplate<U>(options, 'default')
     res.setHeader('X-Requires-OTP', 'true').status(200).send(tokenFormFile)
     return
   }
@@ -144,7 +152,10 @@ async function _sendTokenFormTemplate<U>(
  * @param options The totp options object
  * @returns The rendered token form template
  */
-async function _renderTokenTemplate<U>(options: Required<Pick<TotpApiOptions<U>, 'tokenFormOptions'>>) {
+async function _renderTokenTemplate<U>(
+  options: Required<Pick<TotpApiOptions<U>, 'tokenFormOptions' | 'passportOptions'>>,
+  mode: 'default' | 'passport',
+) {
   // get template contents from file
   const tokenFormFileRaw = await fs.readFile(
     // __dirname is the directory of this file, not the runtime directory
@@ -164,6 +175,12 @@ async function _renderTokenTemplate<U>(options: Required<Pick<TotpApiOptions<U>,
     .replace('/*{{js}}*/', js || '')
     .replace('<!-- {{prependHtml}} -->', prependHtml || '')
     .replace('<!-- {{appendHtml}} -->', appendHtml || '')
+    .replace(
+      '/*{{redirect}}*/',
+      mode === 'passport' && options.passportOptions?.successRedirect
+        ? `window.location = '${options.passportOptions?.successRedirect}'`
+        : `window.location = uri`,
+    )
 
   // return the parsed file contents
   return tokenFormFile

@@ -60,12 +60,7 @@
       <form onsubmit="send()" class="form">
         <fieldset class="fields">
           <div class="inputs">
-            <input
-              class="input"
-              type="text"
-              name="securityKeyOtpResponse"
-              onkeyup="handleInput(event)"
-            />
+            <input class="input" type="text" name="securityKeyOtpResponse" onkeyup="handleInput(event)" />
             <input class="input" type="text" onkeyup="handleInput(event)" />
             <input class="input" type="text" onkeyup="handleInput(event)" />
             <input class="input" type="text" onkeyup="handleInput(event)" />
@@ -111,7 +106,7 @@
         const uri = new URL(window.location.href)
         uri.searchParams.set('token', token)
         document.querySelector('fieldset').disabled = true
-        window.location = uri
+        /*{{redirect}}*/
       }
 
       function getToken() {

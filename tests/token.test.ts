@@ -3,13 +3,18 @@ import { _generateSecret, _generateSecretURL, _verifyToken, _verifyUser } from '
 import { AllOptions, defaultOptions } from '../src/types'
 import _totp from 'totp-generator'
 
+const _defaultOptions: Required<AllOptions<unknown>> = {
+  ...defaultOptions,
+  passportOptions: { tokenFormURL: '/', successRedirect: '/' },
+  issuer: 'issuer',
+  getUser: undefined as never,
+}
+
 describe('generateSecretURL', () => {
   test('generates normal options', () => {
     const secret = _generateSecret()
     const options: Required<AllOptions<unknown>> = {
-      ...defaultOptions,
-      issuer: 'issuer',
-      passportOptions: { tokenFormURL: '/' },
+      ..._defaultOptions,
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -24,9 +29,7 @@ describe('generateSecretURL', () => {
   test('appends non-default options', () => {
     const secret = _generateSecret()
     const options: Required<AllOptions<unknown>> = {
-      ...defaultOptions,
-      issuer: 'issuer',
-      passportOptions: { tokenFormURL: '/' },
+      ..._defaultOptions,
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -56,11 +59,9 @@ describe('generateSecret', () => {
 describe('verifyToken', () => {
   test('verifies correct token', () => {
     const secret = _generateSecret()
-    const token = _totp(secret, defaultOptions)
+    const token = _totp(secret, _defaultOptions)
     const options: Required<AllOptions<unknown>> = {
-      ...defaultOptions,
-      issuer: 'issuer',
-      passportOptions: { tokenFormURL: '/' },
+      ..._defaultOptions,
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -74,9 +75,7 @@ describe('verifyToken', () => {
     const secret = _generateSecret()
     // const token = _totp(secret, defaultOptions)
     const options: Required<AllOptions<unknown>> = {
-      ...defaultOptions,
-      issuer: 'issuer',
-      passportOptions: { tokenFormURL: '/' },
+      ..._defaultOptions,
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -90,7 +89,7 @@ describe('verifyToken', () => {
 describe('verifyUser', () => {
   test('verifies correct user', async () => {
     const secret = _generateSecret()
-    const token = _totp(secret, defaultOptions)
+    const token = _totp(secret, _defaultOptions)
     const userData = {
       user: { username: 'username' },
       secret: secret,
@@ -98,9 +97,7 @@ describe('verifyUser', () => {
     }
 
     const options: Required<AllOptions<unknown>> = {
-      ...defaultOptions,
-      issuer: 'issuer',
-      passportOptions: { tokenFormURL: '/' },
+      ..._defaultOptions,
       getUser: () => userData,
     }
     expect(
@@ -118,7 +115,7 @@ describe('verifyUser', () => {
 
   test('fails incorrect secret', async () => {
     const secret = _generateSecret()
-    const token = _totp(secret, defaultOptions)
+    const token = _totp(secret, _defaultOptions)
     const userData = {
       user: { username: 'username' },
       secret: secret,
@@ -126,9 +123,7 @@ describe('verifyUser', () => {
     }
 
     const options: Required<AllOptions<unknown>> = {
-      ...defaultOptions,
-      issuer: 'issuer',
-      passportOptions: { tokenFormURL: '/' },
+      ..._defaultOptions,
       getUser: () => userData,
     }
     expect(
@@ -153,9 +148,7 @@ describe('verifyUser', () => {
     }
 
     const options: Required<AllOptions<unknown>> = {
-      ...defaultOptions,
-      issuer: 'issuer',
-      passportOptions: { tokenFormURL: '/' },
+      ..._defaultOptions,
       getUser: () => userData,
     }
     expect(

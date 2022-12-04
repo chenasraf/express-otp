@@ -235,7 +235,12 @@ export interface TotpMiddlewares<U> {
    * Strategy for use with Passport.js. This is a wrapper around `authenticate()`.
    * @param optionsOverride Options to override the options passed to `totp()`.
    */
-  passport(optionsOverride: Partial<AllOptions<U>>): Strategy
+  passport(optionsOverride?: Partial<AllOptions<U>>): Strategy
+
+  /**
+   * A token form renderer for passport.js. This is a wrapper around `tokenForm()`.
+   */
+  passportTokenForm(): (req: Request, res: Response, next: () => void) => Promise<void>
 }
 
 /**
