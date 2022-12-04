@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from 'express'
+import { Strategy } from 'passport-strategy'
 import { OTPError } from './error'
+import { PassportOTPStrategyOptions } from './passport'
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     export interface Request {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      user?: any
+      user?: User
     }
   }
 }
@@ -109,6 +111,12 @@ export interface TotpApiOptions<U> {
    * Options for generating the token form.
    */
   tokenFormOptions?: Partial<TokenFormOptions>
+
+  /**
+   * Options for Passport.js strategy. If you want to use Passport.js strategy, you will have to provide this.
+   * Otherwise, it will throw an error if you try to use it.
+   */
+  passportOptions?: PassportOTPStrategyOptions
 }
 
 /** Combination of {@link TotpOptions} and {@link TotpApiOptions}. */
@@ -222,12 +230,18 @@ export interface TotpMiddlewares<U> {
    * @returns {Promise<U | undefined>} The user, or `undefined` if the token is invalid.
    */
   verifyUser(req: Request): Promise<U | undefined>
+
+  /**
+   * Strategy for use with Passport.js. This is a wrapper around `authenticate()`.
+   * @param optionsOverride Options to override the options passed to `totp()`.
+   */
+  passport(optionsOverride: Partial<AllOptions<U>>): Strategy
 }
 
 /**
  * The default options for the middleware.
  */
-export const defaultOptions: Omit<Required<AllOptions<unknown>>, 'issuer' | 'getUser'> = {
+export const defaultOptions: Omit<Required<AllOptions<unknown>>, 'issuer' | 'getUser' | 'passportOptions'> = {
   digits: 6,
   period: 30,
   algorithm: 'SHA-1',

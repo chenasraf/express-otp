@@ -1,9 +1,10 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { NextFunction, Request, Response } from 'express'
-import { AuthOptions, defaultOptions, TotpApiOptions, TotpMiddlewares, TotpOptions } from './types'
+import { AllOptions, AuthOptions, defaultOptions, TotpApiOptions, TotpMiddlewares, TotpOptions } from './types'
 import { OTPError } from './error'
 import { _generateSecret, _generateSecretQR, _generateSecretURL, _verifyToken, _verifyUser } from './token'
+import { PassportOTPStrategy, PassportOTPStrategyOptions } from './passport'
 
 /**
  * Main TOTP function. Use this to generate the middleware and additional (optional) functions for TOTP authentication.
@@ -49,6 +50,11 @@ export default function totp<U>(options: TotpOptions & TotpApiOptions<U>): TotpM
     return _generateSecret()
   }
 
+  // passport strategy
+  function passport(optionsOverrides: Partial<AllOptions<U>>): PassportOTPStrategy<U> {
+    return new PassportOTPStrategy({ ...mergedOptions, ...optionsOverrides })
+  }
+
   // output
   return {
     authenticate,
@@ -57,6 +63,7 @@ export default function totp<U>(options: TotpOptions & TotpApiOptions<U>): TotpM
     generateNewSecret,
     verifyToken,
     verifyUser,
+    passport,
   }
 }
 
@@ -68,7 +75,7 @@ export default function totp<U>(options: TotpOptions & TotpApiOptions<U>): TotpM
  * @param next The next function
  * @param options The totp options object
  */
-async function _authenticate<U>(
+export async function _authenticate<U>(
   req: Request,
   res: Response,
   next: NextFunction,
