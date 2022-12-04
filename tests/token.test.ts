@@ -9,6 +9,7 @@ describe('generateSecretURL', () => {
     const options: Required<AllOptions<unknown>> = {
       ...defaultOptions,
       issuer: 'issuer',
+      passportOptions: { tokenFormURL: '/' },
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -25,6 +26,7 @@ describe('generateSecretURL', () => {
     const options: Required<AllOptions<unknown>> = {
       ...defaultOptions,
       issuer: 'issuer',
+      passportOptions: { tokenFormURL: '/' },
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -58,6 +60,7 @@ describe('verifyToken', () => {
     const options: Required<AllOptions<unknown>> = {
       ...defaultOptions,
       issuer: 'issuer',
+      passportOptions: { tokenFormURL: '/' },
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -73,6 +76,7 @@ describe('verifyToken', () => {
     const options: Required<AllOptions<unknown>> = {
       ...defaultOptions,
       issuer: 'issuer',
+      passportOptions: { tokenFormURL: '/' },
       getUser: () => ({
         user: { username: 'username' },
         secret: secret,
@@ -96,6 +100,7 @@ describe('verifyUser', () => {
     const options: Required<AllOptions<unknown>> = {
       ...defaultOptions,
       issuer: 'issuer',
+      passportOptions: { tokenFormURL: '/' },
       getUser: () => userData,
     }
     expect(
@@ -123,6 +128,7 @@ describe('verifyUser', () => {
     const options: Required<AllOptions<unknown>> = {
       ...defaultOptions,
       issuer: 'issuer',
+      passportOptions: { tokenFormURL: '/' },
       getUser: () => userData,
     }
     expect(
@@ -149,6 +155,7 @@ describe('verifyUser', () => {
     const options: Required<AllOptions<unknown>> = {
       ...defaultOptions,
       issuer: 'issuer',
+      passportOptions: { tokenFormURL: '/' },
       getUser: () => userData,
     }
     expect(

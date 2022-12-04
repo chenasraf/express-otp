@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express'
 import { AllOptions, AuthOptions, defaultOptions, TotpApiOptions, TotpMiddlewares, TotpOptions } from './types'
 import { OTPError } from './error'
 import { _generateSecret, _generateSecretQR, _generateSecretURL, _verifyToken, _verifyUser } from './token'
-import { PassportOTPStrategy, PassportOTPStrategyOptions } from './passport'
+import { PassportOTPStrategy } from './passport'
 
 /**
  * Main TOTP function. Use this to generate the middleware and additional (optional) functions for TOTP authentication.
